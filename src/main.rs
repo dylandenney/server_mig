@@ -42,6 +42,10 @@ fn gather_existing_users() -> Vec<User> {
 }
 
 
+fn shell_quote(s: &str) -> String {
+    format!("'{}'", s.replace('\'', "'\\''"))
+}
+
 pub fn generate_user_create_script(users_to_create: &[User]) -> String {
     let mut script = String::new();
     script.push_str("#!/bin/bash\n");
@@ -49,7 +53,7 @@ pub fn generate_user_create_script(users_to_create: &[User]) -> String {
     for user in users_to_create {
         script.push_str(&format!(
             "useradd {} -u {} -g {}\n",
-            user.username, user.uid, user.gid
+            shell_quote(&user.username), user.uid, user.gid
         ));
     }
 

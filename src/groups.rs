@@ -26,12 +26,16 @@ pub fn gather_relevant_groups(user_gids: HashSet<u32>) -> Vec<Group> {
     relevant_groups
 }
 
+fn shell_quote(s: &str) -> String {
+    format!("'{}'", s.replace('\'', "'\\''"))
+}
+
 pub fn generate_group_create_script(groups_to_create: &[Group]) -> String {
     let mut script = String::new();
     script.push_str("#!/bin/bash\n");
 
     for group in groups_to_create {
-        script.push_str(&format!("groupadd {} -g {}\n", group.name, group.gid));
+        script.push_str(&format!("groupadd {} -g {}\n", shell_quote(&group.name), group.gid));
     }
 
     script
