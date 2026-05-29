@@ -25,6 +25,13 @@ pub fn check_installed_libs() -> Vec<String> {
 }
 
 
+fn is_safe_lib_name(name: &str) -> bool {
+    !name.is_empty()
+        && name
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_' | '+'))
+}
+
 pub fn save_lib_install_script(libs: &[String], filename: &str) -> io::Result<()> {
     let mut file = File::create(filename)?;
 
@@ -33,10 +40,18 @@ pub fn save_lib_install_script(libs: &[String], filename: &str) -> io::Result<()
 
     for lib in libs {
         let parts: Vec<&str> = lib.splitn(2, ' ').collect();
+        let lib_name = parts[0];
+        if !is_safe_lib_name(lib_name) {
+            eprintln!(
+                "WARNING: skipping library with unsafe name: {:?}",
+                lib_name
+            );
+            continue;
+        }
         if parts.len() == 2 {
-            writeln!(file, "yum install -y {} #{}", parts[0], parts[1])?;
+            writeln!(file, "yum install -y {} #{}", lib_name, parts[1])?;
         } else {
-            writeln!(file, "yum install -y {}", parts[0])?;
+            writeln!(file, "yum install -y {}", lib_name)?;
         }
     }
 
