@@ -29,12 +29,16 @@ pub fn gather_owned_directories(root: &Path) -> Vec<OwnedDir> {
 }
 
 
+fn shell_quote(s: &str) -> String {
+    format!("'{}'", s.replace('\'', "'\\''"))
+}
+
 pub fn generate_ownership_script(owned_dirs: &[OwnedDir]) -> String {
     let mut script = String::from("#!/bin/bash\n");
     for dir in owned_dirs {
         script.push_str(&format!(
             "chown {}:{} {}\n",
-            dir.uid, dir.gid, dir.path
+            dir.uid, dir.gid, shell_quote(&dir.path)
         ));
     }
     script
